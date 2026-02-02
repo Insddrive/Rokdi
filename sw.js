@@ -1,4 +1,4 @@
-const CACHE_NAME = 'receipt-pro-v15';
+const CACHE_NAME = 'rokdi-cache-v16';
 const assets = [
   './',
   './index.html',
