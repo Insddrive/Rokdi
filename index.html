@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ਰਸੀਦ ਕੈਲਕੁਲੇਟਰ - v15</title>
+    <title>Rokdi</title>
     
-    <!-- PWA Settings -->
-    <link rel="manifest" href="manifest.json?v=15">
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json?v=16">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,23 +31,21 @@
         body { background-color: var(--bg-body); color: var(--text-dark); width: 100%; overflow-x: hidden; padding: 12px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 480px; }
 
-        /* Install Banner */
+        /* Install Row */
         #install-row {
             display: none; width: 100%; background: #2563eb; color: white;
             padding: 12px; border-radius: 12px; text-align: center;
             margin-bottom: 12px; font-weight: 800; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
             font-size: 14px;
         }
 
-        /* Compact Header */
+        /* Header Style */
         .header {
             background: var(--header-bg); 
-            padding: 12px 16px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 15px; 
-            text-align: center; 
+            padding: 15px 18px; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px; 
             position: sticky; 
             top: 8px; 
             z-index: 1000; 
@@ -56,47 +54,63 @@
             justify-content: space-between;
             align-items: center;
         }
-        .total-display { font-size: 22px; font-weight: 900; color: #000; }
+        .total-badge { font-size: 24px; font-weight: 900; color: #000; }
         #date-now { font-size: 12px; font-weight: 800; color: #94a3b8; }
 
-        .group { margin-bottom: 20px; }
-        .group-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 0 4px; }
-        .group-label { font-size: 17px; font-weight: 800; }
-        .btn-plus { width: 38px; height: 38px; border-radius: 10px; border: none; color: white; font-size: 24px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        /* Denom Groups */
+        .group { margin-bottom: 25px; }
+        .group-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
+        .group-label { font-size: 18px; font-weight: 800; }
+        .btn-plus { width: 42px; height: 42px; border-radius: 12px; border: none; color: white; font-size: 26px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
 
-        .card { background: white; border-radius: 15px; padding: 14px; margin-bottom: 12px; position: relative; border-left: 6px solid #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .btn-del { position: absolute; top: -8px; right: -8px; background: #000; color: #fff; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+        /* Card Style */
+        .card { background: white; border-radius: 18px; padding: 16px; margin-bottom: 14px; position: relative; border-left: 8px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.03); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .inputs-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+        /* Delete Button */
+        .btn-del { position: absolute; top: -10px; right: -10px; background: #000; color: #fff; width: 30px; height: 30px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card-id { font-size: 11px; font-weight: 800; color: #94a3b8; }
+        .card-subtotal { font-weight: 900; font-size: 18px; }
+
+        .inputs-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
         .field { display: flex; flex-direction: column; }
-        .field label { font-size: 9px; font-weight: 800; color: var(--text-muted); margin-bottom: 3px; text-transform: uppercase; }
+        .field label { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
         
-        input { width: 100%; padding: 10px 4px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 16px; font-weight: 700; text-align: center; background: #fdfdfd; outline: none; }
+        input { width: 100%; padding: 12px 4px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 17px; font-weight: 700; text-align: center; background: #fdfdfd; outline: none; }
         
         /* RED text for Copy Number Input */
-        input.copy-num-input {
-            color: var(--red-text) !important;
-            border-color: #fecaca;
-        }
+        input.copy-num-input { color: var(--red-text) !important; font-weight: 900; border-color: #fecaca; }
 
-        .summary { padding: 10px; border-radius: 10px; font-size: 13px; line-height: 1.5; border: 1px dashed rgba(0,0,0,0.1); word-wrap: break-word; }
+        /* Summary Box */
+        .summary { padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.6; border: 1px dashed rgba(0,0,0,0.1); word-wrap: break-word; }
         .red-val { color: var(--red-text) !important; font-weight: 900; }
-        .punjabi-words { font-weight: 800; display: block; margin-top: 4px; text-decoration: underline; }
+        .punjabi-words { font-weight: 800; display: block; margin-top: 5px; text-decoration: underline; }
 
+        /* Individual Reset Link/Button */
+        .card-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+        .btn-card-reset { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; cursor: pointer; }
+
+        /* Dynamic Colors */
         .color-5000 { border-color: var(--c-5000); } .bg-5000 { background: var(--b-5000); color: var(--c-5000); } .text-5000 { color: var(--c-5000); }
         .color-1000 { border-color: var(--c-1000); } .bg-1000 { background: var(--b-1000); color: var(--c-1000); } .text-1000 { color: var(--c-1000); }
         .color-500 { border-color: var(--c-500); } .bg-500 { background: var(--b-500); color: var(--c-500); } .text-500 { color: var(--c-500); }
         .color-100 { border-color: var(--c-100); } .bg-100 { background: var(--b-100); color: var(--c-100); } .text-100 { color: var(--c-100); }
         .color-50 { border-color: var(--c-50); } .bg-50 { background: var(--b-50); color: var(--c-50); } .text-50 { color: var(--c-50); }
 
-        .btn-reset-all { width: 100%; padding: 16px; background: #ef4444; color: #fff; border: none; border-radius: 15px; font-size: 16px; font-weight: 900; margin-bottom: 50px; cursor: pointer; }
+        /* Master Reset */
+        .footer { margin: 40px 0 60px; width: 100%; }
+        .btn-master-reset { width: 100%; padding: 20px; background: #ef4444; color: #fff; border: none; border-radius: 20px; font-size: 18px; font-weight: 900; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); cursor: pointer; }
 
-        #dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .dialog { background: white; padding: 24px; border-radius: 20px; width: 100%; max-width: 320px; text-align: center; }
-        .dialog-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .dialog-btns button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
-        .btn-yes { background: #ef4444; color: white; }
-        .btn-no { background: #f1f5f9; color: #475569; }
+        /* Modal Dialog */
+        #dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .dialog { background: white; padding: 26px; border-radius: 24px; width: 100%; max-width: 340px; text-align: center; }
+        .dialog-btns { display: flex; gap: 12px; margin-top: 24px; }
+        .dialog-btns button { flex: 1; padding: 15px; border: none; border-radius: 14px; font-weight: bold; cursor: pointer; }
+        .btn-confirm { background: #ef4444; color: white; }
+        .btn-cancel { background: #f1f5f9; color: #475569; }
+
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -104,26 +118,28 @@
 
     <div class="container">
         <!-- Install Banner -->
-        <div id="install-row" onclick="installApp()">📲 ਐਪ ਇੰਸਟਾਲ ਕਰੋ</div>
+        <div id="install-row" onclick="installApp()">📲 Rokdi ਐਪ ਇੰਸਟਾਲ ਕਰੋ</div>
 
         <div class="header">
-            <div class="total-display">ਟੋਟਲ - <span id="total-val">₹ 0</span></div>
+            <div class="total-badge">ਟੋਟਲ - <span id="total-val">₹ 0</span></div>
             <div id="date-now"></div>
         </div>
-        
+
         <div id="groups-container"></div>
-        
-        <button class="btn-reset-all" onclick="triggerResetAll()">RESET ALL</button>
+
+        <div class="footer">
+            <button class="btn-master-reset" onclick="triggerMasterReset()">MASTER RESET</button>
+        </div>
     </div>
 
-    <!-- Confirmation Dialog -->
+    <!-- Confirm Dialog -->
     <div id="dialog-overlay">
         <div class="dialog">
             <h3 id="dialog-title">ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਹੋ?</h3>
             <p id="dialog-msg">ਇਹ ਡਾਟਾ ਵਾਪਸ ਨਹੀਂ ਆਵੇਗਾ।</p>
             <div class="dialog-btns">
-                <button class="btn-yes" id="dialog-confirm">ਹਾਂ</button>
-                <button class="btn-no" onclick="closeDialog()">ਨਹੀਂ</button>
+                <button class="btn-confirm" id="dialog-confirm">ਹਾਂ</button>
+                <button class="btn-cancel" onclick="closeDialog()">ਨਹੀਂ</button>
             </div>
         </div>
     </div>
@@ -134,23 +150,7 @@
         let state = {};
         let deferredPrompt;
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-row').style.display = 'block';
-        });
-
-        async function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('install-row').style.display = 'none';
-                }
-                deferredPrompt = null;
-            }
-        }
-
+        // Punjabi Words
         function numToWords(n) {
             const units = ["", "ਇੱਕ", "ਦੋ", "ਤਿੰਨ", "ਚਾਰ", "ਪੰਜ", "ਛੇ", "ਸੱਤ", "ਅੱਠ", "ਨੌ"];
             const tens = ["", "ਦਸ", "ਵੀਹ", "ਤੀਹ", "ਚਾਲੀ", "ਪੰਜਾਹ", "ਸੱਠ", "ਸੱਤਰ", "ਅੱਸੀ", "ਨੱਬੇ"];
@@ -167,32 +167,66 @@
             return res.trim();
         }
 
-        function init() {
-            const stored = localStorage.getItem('RECEIPT_MASTER_V15_STABLE');
-            if (stored) { state = JSON.parse(stored); } 
-            else { denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]); }
-            render();
-            document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-GB');
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js?v=15', { scope: './' });
+        // PWA Install
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-row').style.display = 'block';
+        });
+
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') document.getElementById('install-row').style.display = 'none';
+                deferredPrompt = null;
             }
         }
 
-        function save() { localStorage.setItem('RECEIPT_MASTER_V15_STABLE', JSON.stringify(state)); updateGrandTotal(); }
+        // App Initialization
+        function init() {
+            const stored = localStorage.getItem('ROKDI_APP_V16');
+            if (stored) {
+                state = JSON.parse(stored);
+            } else {
+                denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]);
+            }
+            render();
+            document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-GB');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js?v=16', { scope: './' });
+            }
+        }
 
-        function addRow(d) { state[d].push({ copy:'', start:'', end:'' }); renderDenomGroup(d); save(); }
+        function save() {
+            localStorage.setItem('ROKDI_APP_V16', JSON.stringify(state));
+            updateGrandTotal();
+        }
+
+        function addRow(d) {
+            state[d].push({ copy:'', start:'', end:'' });
+            renderDenomGroup(d);
+            save();
+        }
 
         function askDeleteRow(d, idx) {
-            showDialog("ਡੱਬਾ ਮਿਟਾਉਣਾ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਰਸੀਦ ਦਾ ਹਿਸਾਬ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+            showDialog("ਕਾਪੀ ਮਿਟਾਉਣੀ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਰਸੀਦ ਵਾਲੇ ਡੱਬੇ ਨੂੰ ਲਿਸਟ ਵਿੱਚੋਂ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
                 state[d].splice(idx, 1);
                 if (state[d].length === 0) state[d] = [{ copy:'', start:'', end:'' }];
                 renderDenomGroup(d); save();
             });
         }
 
-        function triggerResetAll() {
-            showDialog("ਸਭ ਕੁਝ ਮਿਟਾਉਣਾ?", "ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾ ਕੇ ਐਪ ਜ਼ੀਰੋ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                localStorage.removeItem('RECEIPT_MASTER_V15_STABLE');
+        function triggerCardReset(d, idx) {
+            showDialog("ਡੱਬਾ ਰੀਸੈੱਟ?", "ਕੀ ਤੁਸੀਂ ਸਿਰਫ਼ ਇਸ ਰਸੀਦ ਕਾਰਡ ਦਾ ਡਾਟਾ ਸਾਫ਼ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                state[d][idx] = { copy:'', start:'', end:'' };
+                renderDenomGroup(d); save();
+            });
+        }
+
+        function triggerMasterReset() {
+            showDialog("MASTER RESET?", "ਕੀ ਤੁਸੀਂ ਪੂਰੀ ਐਪ ਦਾ ਹਿਸਾਬ-ਕਿਤਾਬ ਅਤੇ ਸਾਰੇ ਡੱਬੇ ਮਿਟਾ ਕੇ ਐਪ ਜ਼ੀਰੋ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                localStorage.removeItem('ROKDI_APP_V16');
                 state = {}; denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]);
                 render(); closeDialog();
             });
@@ -209,13 +243,20 @@
             document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
         }
 
-        function handleInput(d, idx, field, val) { state[d][idx][field] = val; updateCardUI(d, idx); save(); }
+        function handleInput(d, idx, field, val) {
+            state[d][idx][field] = val;
+            updateCardUI(d, idx);
+            save();
+        }
 
         function render() {
-            const root = document.getElementById('groups-container'); root.innerHTML = '';
+            const root = document.getElementById('groups-container');
+            root.innerHTML = '';
             denoms.forEach(d => {
-                const groupDiv = document.createElement('div'); groupDiv.className = 'group'; groupDiv.id = `group-${d}`;
-                root.appendChild(groupDiv); renderDenomGroup(d);
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'group'; groupDiv.id = `group-${d}`;
+                root.appendChild(groupDiv);
+                renderDenomGroup(d);
             });
             updateGrandTotal();
         }
@@ -231,7 +272,10 @@
                 html += `
                     <div class="card color-${clr}" data-id="${d}-${idx}">
                         ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span style="font-size:10px; font-weight:800; color:#94a3b8">#${idx + 1}</span><span class="text-${clr}" style="font-weight:900; font-size:16px;">₹ ${amt.toLocaleString('en-IN')}</span></div>
+                        <div class="card-header">
+                            <span class="card-id">ਕਾਪੀ #${idx + 1}</span>
+                            <span class="card-subtotal text-${clr}">₹ ${amt.toLocaleString('en-IN')}</span>
+                        </div>
                         <div class="inputs-row">
                             <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="number" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No."></div>
                             <div class="field"><label>ਤੋਂ</label><input type="number" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start"></div>
@@ -239,6 +283,9 @@
                         </div>
                         <div class="summary bg-${clr}">
                             ${count > 0 ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>` : 'ਵੇਰਵਾ ਭਰੋ...'}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-card-reset" onclick="triggerCardReset(${d}, ${idx})">ਰੀਸੈੱਟ ਕਰੋ</button>
                         </div>
                     </div>`;
             });
