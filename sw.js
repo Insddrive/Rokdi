@@ -1,10 +1,10 @@
-const CACHE_NAME = 'receipt-pro-cache-v14';
+const CACHE_NAME = 'receipt-pro-v15';
 const assets = [
   './',
-  'index.html',
-  'manifest.json',
-  'icon-192.png',
-  'icon-512.png'
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
