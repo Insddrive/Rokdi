@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ਰਸੀਦ ਕੈਲਕੁਲੇਟਰ ਪ੍ਰੋ 2026</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json?v=14">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --header-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --c-5000: #16a34a; --b-5000: #f0fdf4;
+            --c-1000: #2563eb; --b-1000: #eff6ff;
+            --c-500:  #ea580c; --b-500:  #fff7ed;
+            --c-100:  #7c3aed; --b-100:  #f5f3ff;
+            --c-50:   #0d9488; --b-50:   #f0fdfa;
+            --red-text: #ef4444; 
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-dark); width: 100%; overflow-x: hidden; padding: 12px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 480px; }
+
+        /* Install Banner */
+        #install-row {
+            display: none; width: 100%; background: #2563eb; color: white;
+            padding: 14px; border-radius: 12px; text-align: center;
+            margin-bottom: 12px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .header {
+            background: var(--header-bg); padding: 18px; border-radius: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            margin-bottom: 20px; text-align: center; position: sticky; top: 10px; z-index: 1000; border: 1px solid rgba(0,0,0,0.05);
+        }
+        .grand-total { font-size: 38px; font-weight: 900; color: #000; letter-spacing: -1px; }
+
+        .group { margin-bottom: 24px; }
+        .group-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
+        .group-label { font-size: 18px; font-weight: 800; }
+        .btn-plus { width: 42px; height: 42px; border-radius: 12px; border: none; color: white; font-size: 26px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .card { background: white; border-radius: 18px; padding: 16px; margin-bottom: 14px; position: relative; border-left: 8px solid #ccc; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-del { position: absolute; top: -10px; right: -10px; background: #000; color: #fff; width: 30px; height: 30px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+
+        .inputs-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .field { display: flex; flex-direction: column; }
+        .field label { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
+        
+        input { width: 100%; padding: 12px 4px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 17px; font-weight: 700; text-align: center; background: #fdfdfd; outline: none; transition: border 0.2s; }
+        input:focus { border-color: #000; background: #fff; }
+
+        /* RED color for Copy Number Input */
+        input.copy-num-input {
+            color: var(--red-text) !important;
+            border-color: #fecaca;
+        }
+
+        .summary { padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.6; border: 1px dashed rgba(0,0,0,0.1); word-wrap: break-word; }
+        
+        /* RED color for Copy Number in Summary */
+        .red-val { color: var(--red-text) !important; font-weight: 900; }
+        
+        .punjabi-words { font-weight: 800; display: block; margin-top: 5px; text-decoration: underline; }
+
+        .color-5000 { border-color: var(--c-5000); } .bg-5000 { background: var(--b-5000); color: var(--c-5000); } .text-5000 { color: var(--c-5000); }
+        .color-1000 { border-color: var(--c-1000); } .bg-1000 { background: var(--b-1000); color: var(--c-1000); } .text-1000 { color: var(--c-1000); }
+        .color-500 { border-color: var(--c-500); } .bg-500 { background: var(--b-500); color: var(--c-500); } .text-500 { color: var(--c-500); }
+        .color-100 { border-color: var(--c-100); } .bg-100 { background: var(--b-100); color: var(--c-100); } .text-100 { color: var(--c-100); }
+        .color-50 { border-color: var(--c-50); } .bg-50 { background: var(--b-50); color: var(--c-50); } .text-50 { color: var(--c-50); }
+
+        .btn-reset-all { width: 100%; padding: 20px; background: #ef4444; color: #fff; border: none; border-radius: 20px; font-size: 18px; font-weight: 900; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); margin-bottom: 60px; cursor: pointer; }
+
+        #dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+        .dialog { background: white; padding: 28px; border-radius: 28px; width: 100%; max-width: 340px; text-align: center; }
+        .dialog h3 { font-size: 20px; margin-bottom: 12px; }
+        .dialog p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
+        .dialog-btns { display: flex; gap: 12px; }
+        .dialog-btns button { flex: 1; padding: 15px; border: none; border-radius: 16px; font-weight: bold; cursor: pointer; }
+        .btn-yes { background: #ef4444; color: white; }
+        .btn-no { background: #f1f5f9; color: #475569; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Install Banner -->
+        <div id="install-row" onclick="installApp()">📲 ਐਪ ਇੰਸਟਾਲ ਕਰੋ (Install App)</div>
+
+        <div class="header">
+            <h1>ਗ੍ਰੈਂਡ ਟੋਟਲ (Grand Total)</h1>
+            <div id="total-val" class="grand-total">₹ 0</div>
+            <div id="date-now" style="font-size: 13px; font-weight: 800; color: #94a3b8; margin-top: 6px;"></div>
+        </div>
+        <div id="groups-container"></div>
+        <button class="btn-reset-all" onclick="triggerResetAll()">ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ (RESET)</button>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="dialog-overlay">
+        <div class="dialog">
+            <h3 id="dialog-title">ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਹੋ?</h3>
+            <p id="dialog-msg">ਇਹ ਡਾਟਾ ਵਾਪਸ ਨਹੀਂ ਆਵੇਗਾ।</p>
+            <div class="dialog-btns">
+                <button class="btn-yes" id="dialog-confirm">ਹਾਂ</button>
+                <button class="btn-no" onclick="closeDialog()">ਨਹੀਂ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const denoms = [5000, 1000, 500, 100, 50];
+        const colors = { 5000:'5000', 1000:'1000', 500:'500', 100:'100', 50:'50' };
+        let state = {};
+        let deferredPrompt;
+
+        // PWA Install Prompt Logic
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-row').style.display = 'block';
+        });
+
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('install-row').style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        }
+
+        function numToWords(n) {
+            const units = ["", "ਇੱਕ", "ਦੋ", "ਤਿੰਨ", "ਚਾਰ", "ਪੰਜ", "ਛੇ", "ਸੱਤ", "ਅੱਠ", "ਨੌ"];
+            const tens = ["", "ਦਸ", "ਵੀਹ", "ਤੀਹ", "ਚਾਲੀ", "ਪੰਜਾਹ", "ਸੱਠ", "ਸੱਤਰ", "ਅੱਸੀ", "ਨੱਬੇ"];
+            const teens = ["ਦਸ", "ਗਿਆਰਾਂ", "ਬਾਰਾਂ", "ਤੇਰਾਂ", "ਚੌਦਾਂ", "ਪੰਦਰਾਂ", "ਸੋਲ਼ਾਂ", "ਸਤਾਰਾਂ", "ਅਠਾਰਾਂ", "ਉੱਨੀ"];
+            if (n === 0) return "";
+            let res = "";
+            if (n >= 100000) { res += numToWords(Math.floor(n / 100000)) + " ਲੱਖ "; n %= 100000; }
+            if (n >= 1000) { res += numToWords(Math.floor(n / 1000)) + " ਹਜ਼ਾਰ "; n %= 1000; }
+            if (n >= 100) { res += units[Math.floor(n / 100)] + " ਸੌ "; n %= 100; }
+            if (n > 0) {
+                if (n < 10) res += units[n]; else if (n >= 10 && n < 20) res += teens[n - 10];
+                else { res += tens[Math.floor(n / 10)] + (n % 10 !== 0 ? " " + units[n % 10] : ""); }
+            }
+            return res.trim();
+        }
+
+        function init() {
+            const stored = localStorage.getItem('RECEIPT_PRO_V14_FINAL');
+            if (stored) { state = JSON.parse(stored); } 
+            else { denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]); }
+            render();
+            document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-GB');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js?v=14', { scope: './' }).then(reg => {
+                    console.log("SW Registered v14");
+                });
+            }
+        }
+
+        function save() { localStorage.setItem('RECEIPT_PRO_V14_FINAL', JSON.stringify(state)); updateGrandTotal(); }
+
+        function addRow(d) { state[d].push({ copy:'', start:'', end:'' }); renderDenomGroup(d); save(); }
+
+        function askDeleteRow(d, idx) {
+            showDialog("ਡੱਬਾ ਮਿਟਾਉਣਾ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਰਸੀਦ ਦਾ ਹਿਸਾਬ ਲਿਸਟ ਵਿੱਚੋਂ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                state[d].splice(idx, 1);
+                if (state[d].length === 0) state[d] = [{ copy:'', start:'', end:'' }];
+                renderDenomGroup(d); save();
+            });
+        }
+
+        function triggerResetAll() {
+            showDialog("ਸਭ ਕੁਝ ਮਿਟਾਉਣਾ?", "ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾ ਕੇ ਐਪ ਜ਼ੀਰੋ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                localStorage.removeItem('RECEIPT_PRO_V14_FINAL');
+                state = {}; denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]);
+                render(); closeDialog();
+            });
+        }
+
+        function updateGrandTotal() {
+            let total = 0;
+            denoms.forEach(d => {
+                state[d].forEach(r => {
+                    const s = parseInt(r.start), e = parseInt(r.end);
+                    if (s > 0 && e >= s) total += (e - s + 1) * d;
+                });
+            });
+            document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
+        }
+
+        function handleInput(d, idx, field, val) { state[d][idx][field] = val; updateCardUI(d, idx); save(); }
+
+        function render() {
+            const root = document.getElementById('groups-container'); root.innerHTML = '';
+            denoms.forEach(d => {
+                const groupDiv = document.createElement('div'); groupDiv.className = 'group'; groupDiv.id = `group-${d}`;
+                root.appendChild(groupDiv); renderDenomGroup(d);
+            });
+            updateGrandTotal();
+        }
+
+        function renderDenomGroup(d) {
+            const container = document.getElementById(`group-${d}`);
+            const clr = colors[d];
+            let html = `<div class="group-title-row"><span class="group-label text-${clr}">₹ ${d.toLocaleString('en-IN')} ਰਸੀਦਾਂ</span><button class="btn-plus" style="background:var(--c-${clr})" onclick="addRow(${d})">+</button></div>`;
+            state[d].forEach((row, idx) => {
+                const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
+                const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
+                const amt = count * d;
+                html += `
+                    <div class="card color-${clr}" data-id="${d}-${idx}">
+                        ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
+                        <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span style="font-size:11px; font-weight:800; color:#94a3b8">#${idx + 1}</span><span class="text-${clr}" style="font-weight:900; font-size:17px;">₹ ${amt.toLocaleString('en-IN')}</span></div>
+                        <div class="inputs-row">
+                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="number" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No."></div>
+                            <div class="field"><label>ਤੋਂ (Start)</label><input type="number" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start"></div>
+                            <div class="field"><label>ਤੱਕ (End)</label><input type="number" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End"></div>
+                        </div>
+                        <div class="summary bg-${clr}">
+                            ${count > 0 ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>` : 'ਵੇਰਵਾ ਭਰੋ...'}
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateCardUI(d, idx) {
+            const card = document.querySelector(`[data-id="${d}-${idx}"]`); if (!card) return;
+            const row = state[d][idx];
+            const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
+            const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
+            const amt = count * d;
+            card.querySelector(`.text-${colors[d]}`).innerText = `₹ ${amt.toLocaleString('en-IN')}`;
+            const summary = card.querySelector('.summary');
+            if (count > 0) { summary.innerHTML = `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>`; } 
+            else { summary.innerText = "ਵੇਰਵਾ ਭਰੋ..."; }
+        }
+
+        function showDialog(title, msg, onConfirm) {
+            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerText = msg;
+            const btn = document.getElementById('dialog-confirm'); btn.onclick = () => { onConfirm(); closeDialog(); };
+            document.getElementById('dialog-overlay').style.display = 'flex';
+        }
+        function closeDialog() { document.getElementById('dialog-overlay').style.display = 'none'; }
+        window.onload = init;
+    </script>
+</body>
+</html>
+
