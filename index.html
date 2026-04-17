@@ -6,7 +6,7 @@
     <title>Rokdi</title>
     
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json?v=16">
+    <link rel="manifest" href="manifest.json?v=17">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -112,6 +112,29 @@
         .btn-cancel { background: #f1f5f9; color: #475569; }
 
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        /* Toggle Switch */
+        .toggle-wrap { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+        .toggle-label { font-size: 12px; font-weight: 800; color: var(--text-muted); }
+        .toggle-btn {
+            position: relative; width: 52px; height: 28px; border-radius: 14px;
+            border: none; cursor: pointer; transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .toggle-btn::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 22px; height: 22px; border-radius: 50%; background: white;
+            transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .toggle-btn.on { background: var(--toggle-color, #16a34a); }
+        .toggle-btn.on::after { transform: translateX(24px); }
+        .toggle-btn.off { background: #ef4444; }
+        .toggle-btn.off::after { transform: translateX(0); }
+
+        /* Card disabled state */
+        .card.disabled { opacity: 0.6; }
+        .card.disabled .summary { text-decoration: line-through; opacity: 0.7; }
+        .card.disabled .card-subtotal { text-decoration: line-through; color: #ef4444 !important; }
     </style>
 </head>
 <body>
@@ -185,26 +208,28 @@
 
         // App Initialization
         function init() {
-            const stored = localStorage.getItem('ROKDI_APP_V16');
+            const stored = localStorage.getItem('ROKDI_APP_V17');
             if (stored) {
                 state = JSON.parse(stored);
+                // migrate: ensure enabled field exists
+                denoms.forEach(d => { if(state[d]) state[d].forEach(r => { if(r.enabled === undefined) r.enabled = true; }); });
             } else {
-                denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]);
+                denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'', enabled: true }]);
             }
             render();
             document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-GB');
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js?v=16', { scope: './' });
+                navigator.serviceWorker.register('./sw.js?v=17', { scope: './' });
             }
         }
 
         function save() {
-            localStorage.setItem('ROKDI_APP_V16', JSON.stringify(state));
+            localStorage.setItem('ROKDI_APP_V17', JSON.stringify(state));
             updateGrandTotal();
         }
 
         function addRow(d) {
-            state[d].push({ copy:'', start:'', end:'' });
+            state[d].push({ copy:'', start:'', end:'', enabled: true });
             renderDenomGroup(d);
             save();
         }
@@ -219,15 +244,15 @@
 
         function triggerCardReset(d, idx) {
             showDialog("ਡੱਬਾ ਰੀਸੈੱਟ?", "ਕੀ ਤੁਸੀਂ ਸਿਰਫ਼ ਇਸ ਰਸੀਦ ਕਾਰਡ ਦਾ ਡਾਟਾ ਸਾਫ਼ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                state[d][idx] = { copy:'', start:'', end:'' };
+                state[d][idx] = { copy:'', start:'', end:'', enabled: true };
                 renderDenomGroup(d); save();
             });
         }
 
         function triggerMasterReset() {
             showDialog("MASTER RESET?", "ਕੀ ਤੁਸੀਂ ਪੂਰੀ ਐਪ ਦਾ ਹਿਸਾਬ-ਕਿਤਾਬ ਅਤੇ ਸਾਰੇ ਡੱਬੇ ਮਿਟਾ ਕੇ ਐਪ ਜ਼ੀਰੋ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                localStorage.removeItem('ROKDI_APP_V16');
-                state = {}; denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'' }]);
+                localStorage.removeItem('ROKDI_APP_V17');
+                state = {}; denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'', enabled: true }]);
                 render(); closeDialog();
             });
         }
@@ -236,6 +261,7 @@
             let total = 0;
             denoms.forEach(d => {
                 state[d].forEach(r => {
+                    if (r.enabled === false) return;
                     const s = parseInt(r.start), e = parseInt(r.end);
                     if (s > 0 && e >= s) total += (e - s + 1) * d;
                 });
@@ -264,13 +290,16 @@
         function renderDenomGroup(d) {
             const container = document.getElementById(`group-${d}`);
             const clr = colors[d];
+            const colorVar = `var(--c-${clr})`;
             let html = `<div class="group-title-row"><span class="group-label text-${clr}">₹ ${d.toLocaleString('en-IN')} ਰਸੀਦਾਂ</span><button class="btn-plus" style="background:var(--c-${clr})" onclick="addRow(${d})">+</button></div>`;
             state[d].forEach((row, idx) => {
+                const isOn = row.enabled !== false;
                 const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
-                const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
+                const count = (isOn && s > 0 && e >= s) ? (e - s + 1) : 0;
                 const amt = count * d;
+                const disabledClass = isOn ? '' : ' disabled';
                 html += `
-                    <div class="card color-${clr}" data-id="${d}-${idx}">
+                    <div class="card color-${clr}${disabledClass}" data-id="${d}-${idx}">
                         ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
                         <div class="card-header">
                             <span class="card-id">ਕਾਪੀ #${idx + 1}</span>
@@ -282,9 +311,13 @@
                             <div class="field"><label>ਤੱਕ</label><input type="number" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End"></div>
                         </div>
                         <div class="summary bg-${clr}">
-                            ${count > 0 ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>` : 'ਵੇਰਵਾ ਭਰੋ...'}
+                            ${count > 0 ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>` : (isOn ? 'ਵੇਰਵਾ ਭਰੋ...' : '⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ')}
                         </div>
-                        <div class="card-actions">
+                        <div class="card-actions" style="justify-content:space-between;">
+                            <div class="toggle-wrap">
+                                <button class="toggle-btn ${isOn ? 'on' : 'off'}" style="${isOn ? `--toggle-color:var(--c-${clr})` : ''}" onclick="askToggleRow(${d}, ${idx}, ${isOn})"></button>
+                                <span class="toggle-label">${isOn ? 'ਟੋਟਲ ਵਿੱਚ ਜੋੜਿਆ' : 'ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ'}</span>
+                            </div>
                             <button class="btn-card-reset" onclick="triggerCardReset(${d}, ${idx})">ਰੀਸੈੱਟ ਕਰੋ</button>
                         </div>
                     </div>`;
@@ -302,6 +335,20 @@
             const summary = card.querySelector('.summary');
             if (count > 0) { summary.innerHTML = `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>`; } 
             else { summary.innerText = "ਵੇਰਵਾ ਭਰੋ..."; }
+        }
+
+        function askToggleRow(d, idx, currentlyOn) {
+            if (currentlyOn) {
+                showDialog("ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਉਣਾ ਹੈ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਕਾਪੀ ਦਾ ਜੋੜ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                    state[d][idx].enabled = false;
+                    renderDenomGroup(d); save();
+                });
+            } else {
+                showDialog("ਟੋਟਲ ਵਿੱਚ ਜੋੜਨਾ ਹੈ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਕਾਪੀ ਦਾ ਜੋੜ ਵਾਪਸ ਟੋਟਲ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
+                    state[d][idx].enabled = true;
+                    renderDenomGroup(d); save();
+                });
+            }
         }
 
         function showDialog(title, msg, onConfirm) {
