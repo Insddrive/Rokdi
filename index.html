@@ -6,7 +6,7 @@
     <title>Rokdi</title>
     
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json?v=17">
+    <link rel="manifest" href="manifest.json?v=18">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -220,7 +220,7 @@
 
         // App Initialization
         function init() {
-            const stored = localStorage.getItem('ROKDI_APP_V17');
+            const stored = localStorage.getItem('ROKDI_APP_V18');
             if (stored) {
                 state = JSON.parse(stored);
                 // migrate: ensure enabled field exists
@@ -231,12 +231,12 @@
             render();
             document.getElementById('date-now').innerText = new Date().toLocaleDateString('en-GB');
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js?v=17', { scope: './' });
+                navigator.serviceWorker.register('./sw.js?v=18', { scope: './' });
             }
         }
 
         function save() {
-            localStorage.setItem('ROKDI_APP_V17', JSON.stringify(state));
+            localStorage.setItem('ROKDI_APP_V18', JSON.stringify(state));
             updateGrandTotal();
         }
 
@@ -263,7 +263,7 @@
 
         function triggerMasterReset() {
             showDialog("MASTER RESET?", "ਕੀ ਤੁਸੀਂ ਪੂਰੀ ਐਪ ਦਾ ਹਿਸਾਬ-ਕਿਤਾਬ ਅਤੇ ਸਾਰੇ ਡੱਬੇ ਮਿਟਾ ਕੇ ਐਪ ਜ਼ੀਰੋ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                localStorage.removeItem('ROKDI_APP_V17');
+                localStorage.removeItem('ROKDI_APP_V18');
                 state = {}; denoms.forEach(d => state[d] = [{ copy:'', start:'', end:'', enabled: true }]);
                 render(); closeDialog();
             });
