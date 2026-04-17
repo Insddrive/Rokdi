@@ -1,7 +1,7 @@
 {
   "name": "Rokdi",
   "short_name": "Rokdi",
-  "id": "rokdi-app-v16",
+  "id": "rokdi-app-v17",
   "description": "ਰਸੀਦ ਕੈਲਕੁਲੇਟਰ - ਹਿਸਾਬ ਕਿਤਾਬ ਲਈ ਪੰਜਾਬੀ ਐਪ",
   "start_url": "./index.html",
   "scope": "./",
