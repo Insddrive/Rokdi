@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rokdi-cache-v16';
+const CACHE_NAME = 'rokdi-cache-v17';
 const assets = [
   './',
   './index.html',
