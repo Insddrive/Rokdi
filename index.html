@@ -103,6 +103,17 @@
         .footer { margin: 40px 0 60px; width: 100%; }
         .btn-master-reset { width: 100%; padding: 20px; background: #ef4444; color: #fff; border: none; border-radius: 20px; font-size: 18px; font-weight: 900; box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3); cursor: pointer; }
 
+        /* Disabled Summary Box */
+        #disabled-summary { margin-top: 16px; border-radius: 16px; overflow: hidden; }
+        .all-ok-box { background: #f0fdf4; border: 2px solid #16a34a; border-radius: 16px; padding: 18px; text-align: center; }
+        .all-ok-box .ok-tick { font-size: 32px; display: block; }
+        .all-ok-box .ok-text { font-size: 14px; font-weight: 800; color: #16a34a; margin-top: 4px; display: block; }
+        .disabled-total-box { background: #fef2f2; border: 2px solid #ef4444; border-radius: 16px; padding: 18px; }
+        .disabled-total-box .dt-title { font-size: 13px; font-weight: 800; color: #ef4444; margin-bottom: 10px; display: block; }
+        .disabled-total-box .dt-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #7f1d1d; padding: 4px 0; border-bottom: 1px dashed #fecaca; }
+        .disabled-total-box .dt-row:last-of-type { border-bottom: none; }
+        .disabled-total-box .dt-grand { display: flex; justify-content: space-between; font-size: 17px; font-weight: 900; color: #ef4444; margin-top: 10px; padding-top: 10px; border-top: 2px solid #fecaca; }
+
         /* Modal Dialog */
         #dialog-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .dialog { background: white; padding: 26px; border-radius: 24px; width: 100%; max-width: 340px; text-align: center; }
@@ -152,6 +163,7 @@
 
         <div class="footer">
             <button class="btn-master-reset" onclick="triggerMasterReset()">MASTER RESET</button>
+            <div id="disabled-summary"></div>
         </div>
     </div>
 
@@ -259,14 +271,38 @@
 
         function updateGrandTotal() {
             let total = 0;
+            let disabledTotal = 0;
+            let disabledRows = [];
             denoms.forEach(d => {
-                state[d].forEach(r => {
-                    if (r.enabled === false) return;
+                state[d].forEach((r, idx) => {
                     const s = parseInt(r.start), e = parseInt(r.end);
-                    if (s > 0 && e >= s) total += (e - s + 1) * d;
+                    const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
+                    const amt = count * d;
+                    if (r.enabled === false) {
+                        disabledTotal += amt;
+                        if (amt > 0) disabledRows.push({ copy: r.copy, denom: d, amt });
+                    } else {
+                        total += amt;
+                    }
                 });
             });
             document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
+
+            // Disabled summary box
+            const box = document.getElementById('disabled-summary');
+            if (disabledTotal === 0 && disabledRows.length === 0) {
+                // ਕੋਈ ਵੀ ਬੰਦ ਨਹੀਂ — ਹਰਾ ਟਿੱਕ
+                box.innerHTML = `<div class="all-ok-box"><span class="ok-tick">✅</span><span class="ok-text">ਸਾਰੀਆਂ ਰਸੀਦਾਂ ਟੋਟਲ ਵਿੱਚ ਖੁੱਲੀਆਂ ਹਨ</span></div>`;
+            } else {
+                let rowsHtml = disabledRows.map(r =>
+                    `<div class="dt-row"><span>ਕਾਪੀ ${r.copy || '?'} (₹${r.denom.toLocaleString('en-IN')})</span><span>₹ ${r.amt.toLocaleString('en-IN')}</span></div>`
+                ).join('');
+                box.innerHTML = `<div class="disabled-total-box">
+                    <span class="dt-title">⛔ ਬੰਦ ਕੀਤੀਆਂ ਰਸੀਦਾਂ (ਟੋਟਲ ਵਿੱਚੋਂ ਬਾਹਰ)</span>
+                    ${rowsHtml}
+                    <div class="dt-grand"><span>ਕੁੱਲ ਬੰਦ ਜੋੜ</span><span>₹ ${disabledTotal.toLocaleString('en-IN')}</span></div>
+                </div>`;
+            }
         }
 
         function handleInput(d, idx, field, val) {
@@ -290,20 +326,21 @@
         function renderDenomGroup(d) {
             const container = document.getElementById(`group-${d}`);
             const clr = colors[d];
-            const colorVar = `var(--c-${clr})`;
             let html = `<div class="group-title-row"><span class="group-label text-${clr}">₹ ${d.toLocaleString('en-IN')} ਰਸੀਦਾਂ</span><button class="btn-plus" style="background:var(--c-${clr})" onclick="addRow(${d})">+</button></div>`;
             state[d].forEach((row, idx) => {
                 const isOn = row.enabled !== false;
                 const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
-                const count = (isOn && s > 0 && e >= s) ? (e - s + 1) : 0;
+                // ਅਸਲ ਜੋੜ ਹਮੇਸ਼ਾ ਦਿਖਾਓ, ਚਾਹੇ ON ਹੋਵੇ ਜਾਂ OFF
+                const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
                 const amt = count * d;
                 const disabledClass = isOn ? '' : ' disabled';
+                const subtotalStyle = isOn ? `class="card-subtotal text-${clr}"` : `class="card-subtotal" style="color:#ef4444;text-decoration:line-through;"`;
                 html += `
                     <div class="card color-${clr}${disabledClass}" data-id="${d}-${idx}">
                         ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
                         <div class="card-header">
                             <span class="card-id">ਕਾਪੀ #${idx + 1}</span>
-                            <span class="card-subtotal text-${clr}">₹ ${amt.toLocaleString('en-IN')}</span>
+                            <span ${subtotalStyle}>₹ ${amt.toLocaleString('en-IN')}</span>
                         </div>
                         <div class="inputs-row">
                             <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="number" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No."></div>
@@ -311,7 +348,9 @@
                             <div class="field"><label>ਤੱਕ</label><input type="number" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End"></div>
                         </div>
                         <div class="summary bg-${clr}">
-                            ${count > 0 ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>` : (isOn ? 'ਵੇਰਵਾ ਭਰੋ...' : '⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ')}
+                            ${count > 0
+                                ? `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b>${!isOn ? ' <span style="color:#ef4444;font-weight:900;">⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ</span>' : ''}<span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>`
+                                : (isOn ? 'ਵੇਰਵਾ ਭਰੋ...' : '⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ')}
                         </div>
                         <div class="card-actions" style="justify-content:space-between;">
                             <div class="toggle-wrap">
@@ -328,13 +367,21 @@
         function updateCardUI(d, idx) {
             const card = document.querySelector(`[data-id="${d}-${idx}"]`); if (!card) return;
             const row = state[d][idx];
+            const isOn = row.enabled !== false;
             const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
             const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
             const amt = count * d;
-            card.querySelector(`.text-${colors[d]}`).innerText = `₹ ${amt.toLocaleString('en-IN')}`;
+            // ਅਸਲ ਜੋੜ ਹਮੇਸ਼ਾ ਦਿਖਾਓ
+            const subtotalEl = card.querySelector('.card-subtotal');
+            subtotalEl.innerText = `₹ ${amt.toLocaleString('en-IN')}`;
+            if (!isOn) { subtotalEl.style.color = '#ef4444'; subtotalEl.style.textDecoration = 'line-through'; }
+            else { subtotalEl.style.color = ''; subtotalEl.style.textDecoration = ''; }
             const summary = card.querySelector('.summary');
-            if (count > 0) { summary.innerHTML = `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b><span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>`; } 
-            else { summary.innerText = "ਵੇਰਵਾ ਭਰੋ..."; }
+            if (count > 0) {
+                summary.innerHTML = `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = ${amt.toLocaleString('en-IN')}/-</b>${!isOn ? ' <span style="color:#ef4444;font-weight:900;">⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ</span>' : ''}<span class="punjabi-words">${amt.toLocaleString('en-IN')}/- ਅੱਖਰੀ: ${numToWords(amt)} ਰੁਪਏ ਕੇਵਲ</span>`;
+            } else {
+                summary.innerText = isOn ? "ਵੇਰਵਾ ਭਰੋ..." : "⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ";
+            }
         }
 
         function askToggleRow(d, idx, currentlyOn) {
