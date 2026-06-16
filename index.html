@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rokdi</title>
     
-    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json?v=18">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -51,8 +50,27 @@
             z-index: 1000; 
             border: 1px solid rgba(0,0,0,0.05);
             display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .header-top {
+            display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
+        }
+        .copies-badge {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            display: inline-block;
+            align-self: flex-start;
+            word-wrap: break-word;
+            max-width: 100%;
         }
         .total-badge { font-size: 24px; font-weight: 900; color: #000; }
         #date-now { font-size: 12px; font-weight: 800; color: #94a3b8; }
@@ -151,12 +169,16 @@
 <body>
 
     <div class="container">
-        <!-- Install Banner -->
         <div id="install-row" onclick="installApp()">📲 Rokdi ਐਪ ਇੰਸਟਾਲ ਕਰੋ</div>
 
         <div class="header">
-            <div class="total-badge">ਟੋਟਲ - <span id="total-val">₹ 0</span></div>
-            <div id="date-now"></div>
+            <div class="header-top">
+                <div class="total-badge">ਟੋਟਲ - <span id="total-val">₹ 0</span></div>
+                <div id="date-now"></div>
+            </div>
+            <div class="copies-badge">
+                ਕਾਪੀਆਂ: <span id="total-copies-val" style="color: #2563eb; font-size: 16px; margin-left: 4px;">0</span>
+            </div>
         </div>
 
         <div id="groups-container"></div>
@@ -167,7 +189,6 @@
         </div>
     </div>
 
-    <!-- Confirm Dialog -->
     <div id="dialog-overlay">
         <div class="dialog">
             <h3 id="dialog-title">ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਹੋ?</h3>
@@ -273,11 +294,29 @@
             let total = 0;
             let disabledTotal = 0;
             let disabledRows = [];
+            
+            let validCopiesCount = 0;
+            let copyNumbersList = [];
+
             denoms.forEach(d => {
                 state[d].forEach((r, idx) => {
                     const s = parseInt(r.start), e = parseInt(r.end);
                     const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
                     const amt = count * d;
+
+                    // ਚੈੱਕ ਕਰੋ ਕਿ ਕਾਪੀ ਨੰਬਰ ਭਰਿਆ ਹੈ ਜਾਂ 'ਤੋਂ' ਵਾਲਾ ਖਾਨਾ ਭਰਿਆ ਹੈ
+                    let hasCopyNum = r.copy && r.copy.toString().trim() !== '';
+                    let hasStartNum = r.start && r.start.toString().trim() !== '';
+
+                    if (hasCopyNum || hasStartNum) {
+                        validCopiesCount++;
+                        if (hasCopyNum) {
+                            copyNumbersList.push(r.copy.toString().trim());
+                        } else {
+                            copyNumbersList.push('?');
+                        }
+                    }
+
                     if (r.enabled === false) {
                         disabledTotal += amt;
                         if (amt > 0) disabledRows.push({ copy: r.copy, denom: d, amt });
@@ -286,12 +325,19 @@
                     }
                 });
             });
+            
             document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
+
+            // ਕਾਪੀਆਂ ਦੇ ਨੰਬਰ ਅਤੇ ਟੋਟਲ ਦਿਖਾਉਣ ਦਾ ਸਿਸਟਮ
+            let copiesText = "0";
+            if (validCopiesCount > 0) {
+                copiesText = `${copyNumbersList.join(', ')} (ਕੁੱਲ: ${validCopiesCount})`;
+            }
+            document.getElementById('total-copies-val').innerText = copiesText;
 
             // Disabled summary box
             const box = document.getElementById('disabled-summary');
             if (disabledTotal === 0 && disabledRows.length === 0) {
-                // ਕੋਈ ਵੀ ਬੰਦ ਨਹੀਂ — ਹਰਾ ਟਿੱਕ
                 box.innerHTML = `<div class="all-ok-box"><span class="ok-tick">✅</span><span class="ok-text">ਸਾਰੀਆਂ ਰਸੀਦਾਂ ਟੋਟਲ ਵਿੱਚ ਖੁੱਲੀਆਂ ਹਨ</span></div>`;
             } else {
                 let rowsHtml = disabledRows.map(r =>
@@ -330,7 +376,6 @@
             state[d].forEach((row, idx) => {
                 const isOn = row.enabled !== false;
                 const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
-                // ਅਸਲ ਜੋੜ ਹਮੇਸ਼ਾ ਦਿਖਾਓ, ਚਾਹੇ ON ਹੋਵੇ ਜਾਂ OFF
                 const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
                 const amt = count * d;
                 const disabledClass = isOn ? '' : ' disabled';
@@ -371,7 +416,6 @@
             const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
             const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
             const amt = count * d;
-            // ਅਸਲ ਜੋੜ ਹਮੇਸ਼ਾ ਦਿਖਾਓ
             const subtotalEl = card.querySelector('.card-subtotal');
             subtotalEl.innerText = `₹ ${amt.toLocaleString('en-IN')}`;
             if (!isOn) { subtotalEl.style.color = '#ef4444'; subtotalEl.style.textDecoration = 'line-through'; }
@@ -408,4 +452,3 @@
     </script>
 </body>
 </html>
-
