@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rokdi</title>
     
+    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json?v=18">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -150,8 +151,6 @@
         .btn-confirm { background: #ef4444; color: white; }
         .btn-cancel { background: #f1f5f9; color: #475569; }
 
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
         /* Toggle Switch */
         .toggle-wrap { display: flex; align-items: center; gap: 6px; }
         .toggle-label { font-size: 11px; font-weight: 800; color: var(--text-muted); }
@@ -258,8 +257,12 @@
     </style>
 </head>
 <body>
+    
+    <!-- ਲੁਕਵਾਂ ਪਾਸਵਰਡ ਡੱਬਾ, ਆਟੋਫਿਲ ਸਿਸਟਮ ਨੂੰ ਧੋਖਾ ਦੇਣ ਲਈ -->
+    <input type="password" style="opacity: 0; position: absolute; top: -10000px;" aria-hidden="true" autocomplete="new-password">
 
     <div class="container">
+        <!-- Install Banner -->
         <div id="install-row" onclick="installApp()">📲 Rokdi ਐਪ ਇੰਸਟਾਲ ਕਰੋ</div>
 
         <div class="header">
@@ -292,6 +295,7 @@
         </div>
     </div>
 
+    <!-- Confirm Dialog -->
     <div id="dialog-overlay">
         <div class="dialog">
             <h3 id="dialog-title">ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਹੋ?</h3>
@@ -566,7 +570,6 @@
                 
                 const hideStyle = (isCompact && !isComplete) ? 'display: none !important;' : '';
                 
-                /* ਇੱਥੇ ਨਵੇਂ ਗੁਣ (autocomplete="nope", data-form-type="other", data-lpignore="true") ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ ਹਨ */
                 html += `
                     <div class="card color-${clr}${disabledClass}${incompleteClass}" data-id="${d}-${idx}" style="${hideStyle}">
                         ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
@@ -577,9 +580,9 @@
                         </div>
                         
                         <div class="inputs-row">
-                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="text" inputmode="numeric" pattern="[0-9]*" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No." autocomplete="nope" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true"></div>
-                            <div class="field"><label>ਤੋਂ</label><input type="text" inputmode="numeric" pattern="[0-9]*" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start" autocomplete="nope" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true"></div>
-                            <div class="field"><label>ਤੱਕ</label><input type="text" inputmode="numeric" pattern="[0-9]*" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End" autocomplete="nope" autocorrect="off" spellcheck="false" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="tel" name="copy_field_${d}_${idx}" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No." autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਤੋਂ</label><input type="tel" name="start_field_${d}_${idx}" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਤੱਕ</label><input type="tel" name="end_field_${d}_${idx}" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
                         </div>
                         
                         <div class="summary bg-${clr}">
@@ -597,258 +600,6 @@
             });
             container.innerHTML = html;
 
-            if (isCompact && !hasVisibleCards) {
-                container.style.display = 'none';
-            } else {
-                container.style.display = 'block';
-            }
-        }
-
-        function updateCardUI(d, idx) {
-            const card = document.querySelector(`[data-id="${d}-${idx}"]`); if (!card) return;
-            const row = state[d][idx];
-            const isOn = row.enabled !== false;
-            const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
-            const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
-            const amt = count * d;
-            
-            const c_val = row.copy !== undefined && row.copy !== null ? row.copy.toString().trim() : '';
-            const s_val = row.start !== undefined && row.start !== null ? row.start.toString().trim() : '';
-            const e_val = row.end !== undefined && row.end !== null ? row.end.toString().trim() : '';
-            
-            const isComplete = c_val !== '' && s_val !== '' && e_val !== '' && count > 0;
-
-            if (isComplete) {
-                card.classList.remove('incomplete-row');
-                card.style.display = '';
-            } else {
-                card.classList.add('incomplete-row');
-                if (isCompact) card.style.display = 'none';
-            }
-
-            const subtotalEl = card.querySelector('.card-subtotal');
-            subtotalEl.innerText = `₹ ${amt.toLocaleString('en-IN')}`;
-            if (!isOn) { subtotalEl.style.color = '#ef4444'; subtotalEl.style.textDecoration = 'line-through'; }
-            else { subtotalEl.style.color = ''; subtotalEl.style.textDecoration = ''; }
-            
-            const summary = card.querySelector('.summary');
-            summary.innerHTML = getSummaryHtml(row, d, count, s, e, isOn);
-        }
-
-        function askToggleRow(d, idx, currentlyOn) {
-            if (currentlyOn) {
-                showDialog("ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਉਣਾ ਹੈ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਕਾਪੀ ਦਾ ਜੋੜ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                    state[d][idx].enabled = false;
-                    renderDenomGroup(d); save();
-                });
-            } else {
-                showDialog("ਟੋਟਲ ਵਿੱਚ ਜੋੜਨਾ ਹੈ?", "ਕੀ ਤੁਸੀਂ ਇਸ ਕਾਪੀ ਦਾ ਜੋੜ ਵਾਪਸ ਟੋਟਲ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?", () => {
-                    state[d][idx].enabled = true;
-                    renderDenomGroup(d); save();
-                });
-            }
-        }
-
-        function showDialog(title, msg, onConfirm) {
-            document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerText = msg;
-            const btn = document.getElementById('dialog-confirm'); btn.onclick = () => { onConfirm(); closeDialog(); };
-            document.getElementById('dialog-overlay').style.display = 'flex';
-        }
-        function closeDialog() { document.getElementById('dialog-overlay').style.display = 'none'; }
-        window.onload = init;
-    </script>
-</body>
-</html>
-
-            } else {
-                // ਬਿਨਾਂ ਸਿੰਪਲ ਮੋਡ ਦੇ, ਅਸਲ (ਡੱਬੇ ਵਾਲੇ) ਨੰਬਰ ਦਿਖਾਓ
-                document.querySelectorAll('.card').forEach(card => {
-                    const idEl = card.querySelector('.card-id');
-                    if (idEl) {
-                        const localId = idEl.getAttribute('data-local-id');
-                        if(localId) idEl.innerText = `ਕਾਪੀ #${localId}`;
-                    }
-                });
-            }
-        }
-
-        function updateGrandTotal() {
-            let total = 0;
-            let disabledTotal = 0;
-            let disabledRows = [];
-            
-            let validCopiesCount = 0;
-            let disabledCopiesCount = 0;
-            let copyNumbersList = [];
-
-            denoms.forEach(d => {
-                state[d].forEach((r, idx) => {
-                    const s = parseInt(r.start), e = parseInt(r.end);
-                    const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
-                    const amt = count * d;
-
-                    let hasCopyNum = r.copy && r.copy.toString().trim() !== '';
-                    let hasStartNum = r.start && r.start.toString().trim() !== '';
-
-                    if (hasCopyNum || hasStartNum) {
-                        validCopiesCount++;
-                        
-                        let copyNumText = hasCopyNum ? r.copy.toString().trim() : '?';
-
-                        if (r.enabled === false) {
-                            disabledCopiesCount++;
-                            copyNumbersList.push(`<span style="color: #ef4444; font-weight: 900;">${copyNumText}</span>`);
-                        } else {
-                            copyNumbersList.push(copyNumText);
-                        }
-                    }
-
-                    if (r.enabled === false) {
-                        disabledTotal += amt;
-                        if (amt > 0) disabledRows.push({ copy: r.copy, denom: d, amt });
-                    } else {
-                        total += amt;
-                    }
-                });
-            });
-            
-            document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
-
-            // ਹਰੇ ਅੱਖਰਾਂ ਵਿੱਚ ਕੁੱਲ ਕਾਪੀਆਂ ਦਾ ਸਿਸਟਮ 
-            let copiesHtml = "0";
-            if (validCopiesCount > 0) {
-                copiesHtml = `${copyNumbersList.join(', ')} <span style="color: #16a34a; font-weight: 900; white-space: nowrap;">(ਕੁੱਲ: ${validCopiesCount})</span> <span style="color: #ef4444; font-weight: 900; white-space: nowrap;">(ਬੰਦ: ${disabledCopiesCount})</span>`;
-            }
-            document.getElementById('total-copies-val').innerHTML = copiesHtml;
-
-            // Disabled summary box
-            const box = document.getElementById('disabled-summary');
-            if (disabledTotal === 0 && disabledRows.length === 0) {
-                box.innerHTML = `<div class="all-ok-box"><span class="ok-tick">✅</span><span class="ok-text">ਸਾਰੀਆਂ ਰਸੀਦਾਂ ਟੋਟਲ ਵਿੱਚ ਖੁੱਲੀਆਂ ਹਨ</span></div>`;
-            } else {
-                let rowsHtml = disabledRows.map(r =>
-                    `<div class="dt-row"><span>ਕਾਪੀ ${r.copy || '?'} (₹${r.denom.toLocaleString('en-IN')})</span><span>₹ ${r.amt.toLocaleString('en-IN')}</span></div>`
-                ).join('');
-                box.innerHTML = `<div class="disabled-total-box">
-                    <span class="dt-title">⛔ ਬੰਦ ਕੀਤੀਆਂ ਰਸੀਦਾਂ (ਟੋਟਲ ਵਿੱਚੋਂ ਬਾਹਰ)</span>
-                    ${rowsHtml}
-                    <div class="dt-grand"><span>ਕੁੱਲ ਬੰਦ ਜੋੜ</span><span>₹ ${disabledTotal.toLocaleString('en-IN')}</span></div>
-                </div>`;
-            }
-
-            updateSerialNumbers();
-        }
-
-        function handleInput(d, idx, field, val) {
-            state[d][idx][field] = val;
-            updateCardUI(d, idx);
-            save();
-        }
-
-        function getSummaryHtml(row, d, count, s, e, isOn) {
-            const amt = count * d;
-            
-            if (isCompact && count > 0) {
-                return `
-                    <div class="compact-data-row">
-                        <div class="compact-item">
-                            <span class="compact-lbl">ਕਾਪੀ ਨੰ.</span>
-                            <b class="highlight-num copy-hi">${row.copy || "?"}</b>
-                        </div>
-                        <div class="compact-item">
-                            <span class="compact-lbl">ਤੋਂ</span>
-                            <b class="highlight-num">${s}</b>
-                        </div>
-                        <div class="compact-item">
-                            <span class="compact-lbl">ਤੱਕ</span>
-                            <b class="highlight-num">${e}</b>
-                        </div>
-                    </div>
-                    <div style="margin-top: 4px;">
-                        <b class="calc-text">${count} × ${d.toLocaleString('en-IN')} = <span class="total-space">${amt.toLocaleString('en-IN')}/-</span></b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}
-                    </div>
-                `;
-            }
-            else if (count > 0 && (isOn || isCompact)) {
-                return `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b class="calc-text">${count} × ${d.toLocaleString('en-IN')} = <span class="total-space">${amt.toLocaleString('en-IN')}/-</span></b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}`;
-            } else if (count > 0 && !isOn) {
-                return "⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ";
-            } else {
-                return isOn ? "ਵੇਰਵਾ ਭਰੋ..." : "⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ";
-            }
-        }
-
-        function render() {
-            const root = document.getElementById('groups-container');
-            root.innerHTML = '';
-            denoms.forEach(d => {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'group'; groupDiv.id = `group-${d}`;
-                root.appendChild(groupDiv);
-                renderDenomGroup(d);
-            });
-            updateGrandTotal();
-        }
-
-        function renderDenomGroup(d) {
-            const container = document.getElementById(`group-${d}`);
-            const clr = colors[d];
-            let html = `<div class="group-title-row"><span class="group-label text-${clr}">₹ ${d.toLocaleString('en-IN')} ਰਸੀਦਾਂ</span><button class="btn-plus" style="background:var(--c-${clr})" onclick="addRow(${d})">+</button></div>`;
-            
-            let hasVisibleCards = false;
-
-            state[d].forEach((row, idx) => {
-                const isOn = row.enabled !== false;
-                const s = parseInt(row.start) || 0, e = parseInt(row.end) || 0;
-                const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
-                const amt = count * d;
-                
-                const c_val = row.copy !== undefined && row.copy !== null ? row.copy.toString().trim() : '';
-                const s_val = row.start !== undefined && row.start !== null ? row.start.toString().trim() : '';
-                const e_val = row.end !== undefined && row.end !== null ? row.end.toString().trim() : '';
-                
-                // ਜੇਕਰ ਤਿੰਨੇ ਚੀਜ਼ਾਂ ਭਰੀਆਂ ਹਨ, ਤਾਂ ਹੀ ਡੱਬਾ ਪੂਰਾ ਮੰਨਿਆ ਜਾਵੇਗਾ (ਸਿੰਪਲ ਮੋਡ ਲਈ)
-                const isComplete = c_val !== '' && s_val !== '' && e_val !== '' && count > 0;
-                if (isComplete) hasVisibleCards = true;
-
-                const incompleteClass = isComplete ? '' : ' incomplete-row';
-                const disabledClass = isOn ? '' : ' disabled';
-                const subtotalStyle = isOn ? `class="card-subtotal text-${clr}"` : `class="card-subtotal" style="color:#ef4444;text-decoration:line-through;"`;
-                
-                // ਜੇ ਸਿੰਪਲ ਮੋਡ ਹੈ ਅਤੇ ਡੱਬਾ ਅਧੂਰਾ ਹੈ, ਤਾਂ ਇਸਨੂੰ ਪੱਕੇ ਤੌਰ 'ਤੇ ਹਾਈਡ ਕਰ ਦਿਓ
-                const hideStyle = (isCompact && !isComplete) ? 'display: none !important;' : '';
-                
-                html += `
-                    <div class="card color-${clr}${disabledClass}${incompleteClass}" data-id="${d}-${idx}" style="${hideStyle}">
-                        ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
-                        
-                        <div class="card-header">
-                            <span class="card-id" data-local-id="${idx + 1}">ਕਾਪੀ #${idx + 1}</span>
-                            <span ${subtotalStyle}>₹ ${amt.toLocaleString('en-IN')}</span>
-                        </div>
-                        
-                        <div class="inputs-row">
-                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="number" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No."></div>
-                            <div class="field"><label>ਤੋਂ</label><input type="number" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start"></div>
-                            <div class="field"><label>ਤੱਕ</label><input type="number" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End"></div>
-                        </div>
-                        
-                        <div class="summary bg-${clr}">
-                            ${getSummaryHtml(row, d, count, s, e, isOn)}
-                        </div>
-                        
-                        <div class="card-actions" style="justify-content:space-between;">
-                            <div class="toggle-wrap" style="margin-top:0;">
-                                <button class="toggle-btn ${isOn ? 'on' : 'off'}" style="${isOn ? `--toggle-color:var(--c-${clr})` : ''}" onclick="askToggleRow(${d}, ${idx}, ${isOn})"></button>
-                                <span class="toggle-label">${isOn ? 'ਟੋਟਲ ਵਿੱਚ ਜੋੜਿਆ' : 'ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ'}</span>
-                            </div>
-                            <button class="btn-card-reset" onclick="triggerCardReset(${d}, ${idx})">ਰੀਸੈੱਟ ਕਰੋ</button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html;
-
-            // ਸਿੰਪਲ ਮੋਡ ਵਿੱਚ ਜੇਕਰ ਗਰੁੱਪ (ਜਿਵੇਂ 1000 ਵਾਲੀ) ਵਿੱਚ ਕੋਈ ਵੀ ਡੱਬਾ ਭਰਿਆ ਨਹੀਂ, ਤਾਂ ਪੂਰਾ ਗਰੁੱਪ ਹੀ ਲੁਕਾ ਦਿਓ
             if (isCompact && !hasVisibleCards) {
                 container.style.display = 'none';
             } else {
