@@ -296,6 +296,7 @@
             let disabledRows = [];
             
             let validCopiesCount = 0;
+            let disabledCopiesCount = 0;
             let copyNumbersList = [];
 
             denoms.forEach(d => {
@@ -310,6 +311,12 @@
 
                     if (hasCopyNum || hasStartNum) {
                         validCopiesCount++;
+                        
+                        // ਜੇਕਰ ਇਹ ਕਾਪੀ ਬੰਦ ਕੀਤੀ ਹੋਈ ਹੈ, ਤਾਂ ਬੰਦ ਕਾਪੀਆਂ ਦੀ ਗਿਣਤੀ ਵਧਾਓ
+                        if (r.enabled === false) {
+                            disabledCopiesCount++;
+                        }
+                        
                         if (hasCopyNum) {
                             copyNumbersList.push(r.copy.toString().trim());
                         } else {
@@ -329,11 +336,12 @@
             document.getElementById('total-val').innerText = `₹ ${total.toLocaleString('en-IN')}`;
 
             // ਕਾਪੀਆਂ ਦੇ ਨੰਬਰ ਅਤੇ ਟੋਟਲ ਦਿਖਾਉਣ ਦਾ ਸਿਸਟਮ
-            let copiesText = "0";
+            let copiesHtml = "0";
             if (validCopiesCount > 0) {
-                copiesText = `${copyNumbersList.join(', ')} (ਕੁੱਲ: ${validCopiesCount})`;
+                // ਕੁੱਲ ਕਾਪੀਆਂ ਦੀ ਬ੍ਰੈਕਟ ਅਤੇ ਨਾਲ ਹੀ ਲਾਲ ਰੰਗ ਵਿੱਚ ਬੰਦ ਕਾਪੀਆਂ ਦੀ ਬ੍ਰੈਕਟ 
+                copiesHtml = `${copyNumbersList.join(', ')} <span style="white-space: nowrap;">(ਕੁੱਲ: ${validCopiesCount})</span> <span style="color: #ef4444; font-weight: 900; white-space: nowrap;">(ਬੰਦ: ${disabledCopiesCount})</span>`;
             }
-            document.getElementById('total-copies-val').innerText = copiesText;
+            document.getElementById('total-copies-val').innerHTML = copiesHtml;
 
             // Disabled summary box
             const box = document.getElementById('disabled-summary');
