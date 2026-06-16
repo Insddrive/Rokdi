@@ -197,6 +197,9 @@
         body.compact-mode .btn-plus,
         body.compact-mode .footer { display: none !important; }
         
+        /* ਛੁਪਾਉਣ ਵਾਲਾ ਕੋਡ: ਅਧੂਰੇ ਡੱਬੇ (ਜਿਨ੍ਹਾਂ 'ਚ ਕਾਪੀ ਜਾਂ ਤੋਂ/ਤੱਕ ਨਹੀਂ ਹੈ) */
+        body.compact-mode .card.incomplete-row { display: none !important; }
+
         body.compact-mode .card { 
             padding: 12px 14px; 
             margin-bottom: 10px; 
@@ -207,7 +210,6 @@
             padding: 5px 0 0 0; 
             border: none; 
             background: transparent !important; 
-            font-size: 16px; 
         }
         
         /* Fully show disabled cards in compact mode */
@@ -224,11 +226,11 @@
             color: #ef4444 !important; 
         }
 
-        /* ਸਿੰਪਲ ਮੋਡ ਵਿੱਚ ਨੰਬਰਾਂ ਲਈ ਨਵਾਂ ਡਿਜ਼ਾਈਨ (ਲੇਬਲ ਉੱਪਰ, ਡੱਬੇ ਨੇੜੇ) */
+        /* ਸਿੰਪਲ ਮੋਡ ਵਿੱਚ ਨੰਬਰਾਂ ਲਈ ਨਵਾਂ ਡਿਜ਼ਾਈਨ */
         body.compact-mode .compact-data-row {
             display: flex;
             align-items: flex-end;
-            gap: 12px; /* ਡੱਬਿਆਂ ਨੂੰ ਨੇੜੇ ਕਰਨ ਲਈ ਘੱਟ ਸਪੇਸ */
+            gap: 12px; 
             margin-bottom: 8px;
             flex-wrap: wrap;
         }
@@ -243,10 +245,12 @@
             font-weight: 800;
             color: #64748b;
         }
+        
+        /* ਕਾਪੀ/ਤੋਂ/ਤੱਕ ਵਾਲੇ ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ (ਪਹਿਲਾਂ ਨਾਲੋਂ ਥੋੜ੍ਹਾ ਛੋਟਾ: 22px) */
         body.compact-mode .highlight-num {
-            font-size: 26px; /* ਵੱਡੇ ਅੱਖਰ */
-            color: #1d4ed8 !important; /* ਨੀਲਾ ਰੰਗ */
-            background: #dbeafe; /* ਹਲਕਾ ਨੀਲਾ ਬੈਕਗ੍ਰਾਊਂਡ */
+            font-size: 22px; 
+            color: #1d4ed8 !important; 
+            background: #dbeafe; 
             padding: 4px 12px;
             border-radius: 8px;
             border: 1px solid #bfdbfe;
@@ -258,11 +262,24 @@
             min-width: 50px;
         }
 
-        /* ਕਾਪੀ ਨੰਬਰ ਖਾਸ ਤੌਰ 'ਤੇ ਲਾਲ ਰੰਗ ਵਿੱਚ */
         body.compact-mode .highlight-num.copy-hi {
-            color: #ef4444 !important; /* ਲਾਲ ਰੰਗ */
-            background: #fef2f2 !important; /* ਹਲਕਾ ਲਾਲ ਬੈਕਗ੍ਰਾਊਂਡ */
+            color: #ef4444 !important; 
+            background: #fef2f2 !important; 
             border-color: #fecaca !important;
+        }
+
+        /* ਗੁਣਾ ਹੋਣ ਵਾਲੇ ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ */
+        .calc-text {
+            font-size: 16px; /* ਆਮ ਮੋਡ ਵਿੱਚ */
+        }
+        body.compact-mode .calc-text {
+            font-size: 20px; /* ਸਿੰਪਲ ਮੋਡ ਵਿੱਚ ਵੱਡਾ */
+        }
+
+        /* ਬਰਾਬਰ ਤੋਂ ਬਾਅਦ ਸਪੇਸ ਨੂੰ ਕਾਫੀ ਜ਼ਿਆਦਾ ਵਧਾਇਆ ਗਿਆ */
+        .total-space {
+            display: inline-block;
+            margin-left: 50px; /* ਇਹ ਜੋੜ ਨੂੰ ਕਾਫੀ ਅੱਗੇ ਕਰ ਦੇਵੇਗਾ */
         }
     </style>
 </head>
@@ -484,11 +501,10 @@
             save();
         }
 
-        // ਸਾਂਝਾ ਫੰਕਸ਼ਨ ਡਾਟਾ ਬਾਕਸ ਬਣਾਉਣ ਲਈ (ਲੇਬਲ ਉੱਪਰ ਅਤੇ ਟੋਟਲ ਅੱਗੇ ਕਰਨ ਵਾਲਾ)
         function getSummaryHtml(row, d, count, s, e, isOn) {
             const amt = count * d;
             
-            // ਸਿੰਪਲ ਮੋਡ ਲਈ ਵੱਖਰਾ ਡਿਜ਼ਾਈਨ (ਲੇਬਲ ਉੱਪਰ, ਡੱਬੇ ਨੇੜੇ)
+            // ਸਿੰਪਲ ਮੋਡ (ਲੇਬਲ ਉੱਪਰ, ਟੋਟਲ ਵਿੱਚ ਵੱਡੀ ਜਗ੍ਹਾ)
             if (isCompact && count > 0) {
                 return `
                     <div class="compact-data-row">
@@ -506,13 +522,13 @@
                         </div>
                     </div>
                     <div style="margin-top: 6px;">
-                        <b style="font-size:18px;">${count} × ${d.toLocaleString('en-IN')} = &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${amt.toLocaleString('en-IN')}/-</b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}
+                        <b class="calc-text">${count} × ${d.toLocaleString('en-IN')} = <span class="total-space">${amt.toLocaleString('en-IN')}/-</span></b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}
                     </div>
                 `;
             }
-            // ਆਮ ਮੋਡ ਲਈ (ਟੋਟਲ ਵਿੱਚ ਬਰਾਬਰ ਤੋਂ ਬਾਅਦ ਜਗ੍ਹਾ ਛੱਡ ਕੇ)
+            // ਆਮ ਮੋਡ
             else if (count > 0 && (isOn || isCompact)) {
-                return `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b>${count} × ${d.toLocaleString('en-IN')} = &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${amt.toLocaleString('en-IN')}/-</b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}`;
+                return `ਕਾਪੀ ਨੰਬਰ: <b class="red-val">${row.copy || "?"}</b> | ਰਸੀਦ <b>${s}</b> ਤੋਂ <b>${e}</b> ਤੱਕ <br><b class="calc-text">${count} × ${d.toLocaleString('en-IN')} = <span class="total-space">${amt.toLocaleString('en-IN')}/-</span></b>${!isOn ? ' <span style="color:#ef4444;font-weight:900; margin-left:6px;">(⛔ ਬੰਦ ਕਾਪੀ)</span>' : ''}`;
             } else if (count > 0 && !isOn) {
                 return "⛔ ਟੋਟਲ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ";
             } else {
@@ -543,11 +559,15 @@
                 const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
                 const amt = count * d;
                 
+                const hasCopy = row.copy && row.copy.toString().trim() !== '';
+                const isComplete = hasCopy && count > 0;
+                const incompleteClass = isComplete ? '' : ' incomplete-row';
+
                 const disabledClass = isOn ? '' : ' disabled';
                 const subtotalStyle = isOn ? `class="card-subtotal text-${clr}"` : `class="card-subtotal" style="color:#ef4444;text-decoration:line-through;"`;
                 
                 html += `
-                    <div class="card color-${clr}${disabledClass}" data-id="${d}-${idx}">
+                    <div class="card color-${clr}${disabledClass}${incompleteClass}" data-id="${d}-${idx}">
                         ${state[d].length > 1 || row.copy || row.start || row.end ? `<button class="btn-del" onclick="askDeleteRow(${d}, ${idx})">×</button>` : ''}
                         
                         <div class="card-header">
@@ -585,6 +605,14 @@
             const count = (s > 0 && e >= s) ? (e - s + 1) : 0;
             const amt = count * d;
             
+            const hasCopy = row.copy && row.copy.toString().trim() !== '';
+            const isComplete = hasCopy && count > 0;
+            if (isComplete) {
+                card.classList.remove('incomplete-row');
+            } else {
+                card.classList.add('incomplete-row');
+            }
+
             const subtotalEl = card.querySelector('.card-subtotal');
             subtotalEl.innerText = `₹ ${amt.toLocaleString('en-IN')}`;
             if (!isOn) { subtotalEl.style.color = '#ef4444'; subtotalEl.style.textDecoration = 'line-through'; }
