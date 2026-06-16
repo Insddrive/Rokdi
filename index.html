@@ -312,15 +312,15 @@
                     if (hasCopyNum || hasStartNum) {
                         validCopiesCount++;
                         
-                        // ਜੇਕਰ ਇਹ ਕਾਪੀ ਬੰਦ ਕੀਤੀ ਹੋਈ ਹੈ, ਤਾਂ ਬੰਦ ਕਾਪੀਆਂ ਦੀ ਗਿਣਤੀ ਵਧਾਓ
+                        let copyNumText = hasCopyNum ? r.copy.toString().trim() : '?';
+
+                        // ਜੇਕਰ ਇਹ ਕਾਪੀ ਬੰਦ ਕੀਤੀ ਹੋਈ ਹੈ
                         if (r.enabled === false) {
                             disabledCopiesCount++;
-                        }
-                        
-                        if (hasCopyNum) {
-                            copyNumbersList.push(r.copy.toString().trim());
+                            // ਬੰਦ ਕਾਪੀ ਦੇ ਨੰਬਰ ਨੂੰ ਲਾਲ ਰੰਗ ਦਿਓ
+                            copyNumbersList.push(`<span style="color: #ef4444; font-weight: 900;">${copyNumText}</span>`);
                         } else {
-                            copyNumbersList.push('?');
+                            copyNumbersList.push(copyNumText);
                         }
                     }
 
