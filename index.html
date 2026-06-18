@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Rokdi</title>
     
-    <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json?v=18">
     <meta name="theme-color" content="#2563eb">
     <meta name="mobile-web-app-capable" content="yes">
@@ -258,11 +257,9 @@
 </head>
 <body>
     
-    <!-- ਲੁਕਵਾਂ ਪਾਸਵਰਡ ਡੱਬਾ, ਆਟੋਫਿਲ ਸਿਸਟਮ ਨੂੰ ਧੋਖਾ ਦੇਣ ਲਈ -->
     <input type="password" style="opacity: 0; position: absolute; top: -10000px;" aria-hidden="true" autocomplete="new-password">
 
     <div class="container">
-        <!-- Install Banner -->
         <div id="install-row" onclick="installApp()">📲 Rokdi ਐਪ ਇੰਸਟਾਲ ਕਰੋ</div>
 
         <div class="header">
@@ -295,7 +292,6 @@
         </div>
     </div>
 
-    <!-- Confirm Dialog -->
     <div id="dialog-overlay">
         <div class="dialog">
             <h3 id="dialog-title">ਕੀ ਤੁਸੀਂ ਯਕੀਨਨ ਹੋ?</h3>
@@ -580,9 +576,9 @@
                         </div>
                         
                         <div class="inputs-row">
-                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="tel" name="copy_field_${d}_${idx}" class="copy-num-input" value="${row.copy}" oninput="handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No." autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
-                            <div class="field"><label>ਤੋਂ</label><input type="tel" name="start_field_${d}_${idx}" value="${row.start}" oninput="handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
-                            <div class="field"><label>ਤੱਕ</label><input type="tel" name="end_field_${d}_${idx}" value="${row.end}" oninput="handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਕਾਪੀ ਨੰ.</label><input type="text" inputmode="numeric" pattern="[0-9]*" name="copy_field_${d}_${idx}" class="copy-num-input" value="${row.copy}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); handleInput(${d}, ${idx}, 'copy', this.value)" placeholder="No." autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਤੋਂ</label><input type="text" inputmode="numeric" pattern="[0-9]*" name="start_field_${d}_${idx}" value="${row.start}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); handleInput(${d}, ${idx}, 'start', this.value)" placeholder="Start" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
+                            <div class="field"><label>ਤੱਕ</label><input type="text" inputmode="numeric" pattern="[0-9]*" name="end_field_${d}_${idx}" value="${row.end}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); handleInput(${d}, ${idx}, 'end', this.value)" placeholder="End" autocomplete="off" spellcheck="false" autocorrect="off" data-form-type="other" data-lpignore="true"></div>
                         </div>
                         
                         <div class="summary bg-${clr}">
